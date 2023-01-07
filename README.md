@@ -1,6 +1,6 @@
-# JuliaABMtemplate
 
-A very simple standalone ABM example in Julia that can be used as a starting point for a new ABM implementation.
+A very simple model of space colonisation.
+
 
 ## Overview
 
