@@ -30,19 +30,20 @@ include("analysis.jl")
 function setup(par, seed)
 	Random.seed!(seed)
 
-	model = Model(par.r_inf, par.r_rec, par.r_imm, par.r_mort)
+	model = Model(par.r_beta)
 
-	if par.topology == 1
-		model.pop = setup_grid(par.x, par.y)
-	else
-		model.pop = setup_geograph(par.N, par.near, par.nc)
+	model.space = setup_grid(par.x, par.y)
+	for s in model.space
+		s.suitability = rand()
 	end
 
-	for i in 1:par.n_infected
-		rand(model.pop).status = infected
+	model.space[(size(model.space).÷2)...].status = colonised
+
+	for i in 1:(par.n_settled-1)
+		rand(model.space).status = colonised
 	end
 
-	SIRm(model)
+	Gleria(model)
 end
 
 

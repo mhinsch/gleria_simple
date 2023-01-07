@@ -28,7 +28,7 @@ function draw_world(canvas, model)
 	ys = canvas.ysize - 1
 
 	# draw connections
-	for p in model.pop
+#=	for p in model.pop
 		x1 = trunc(Int, p.x * xs) + 1
 		y1 = trunc(Int, p.y * ys) + 1
 
@@ -39,20 +39,14 @@ function draw_world(canvas, model)
 			line(canvas, x1, y1, x2, y2, red(255))
 		end
 	end
-
-	# draw agents
-	for p in model.pop
-		x = trunc(Int, p.x * xs) + 1
-		y = trunc(Int, p.y * ys) + 1
-		
-		if p.status == infected
-			col = red(255)
-		elseif p.status == immune
+=#
+	# draw sectors
+	for x in 1:size(model.space)[1], y in 1:size(model.space)[2]
+		s = model.space[x, y]
+		if s.status == empty
+			col = red(floor(Int, 255 * s.suitability))
+		elseif s.status == colonised
 			col = green(255)
-		elseif p.status == susceptible
-			col = blue(255)
-		elseif p.status == dead
-			col = rgb(120, 120, 120)
 		end
 		
 		circle_fill(canvas, x, y, 3, UInt32(col), true)

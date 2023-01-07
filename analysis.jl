@@ -35,17 +35,15 @@ const I = Iterators
 @observe Data model t_now begin
 	@record "time" t_now
 
-	@for a in model.pop begin
-		@stat("susceptible", CountAcc) <| (a.status == susceptible)
-		@stat("infected", 	CountAcc) <| (a.status == infected)
-		@stat("immune", 	CountAcc) <| (a.status == immune)
-		@stat("dead", 		CountAcc) <| (a.status == dead)
+	@for a in model.space begin
+		@stat("colonised", CountAcc) <| (a.status == colonised)
+		@stat("empty", 	CountAcc) <| (a.status == empty)
 	end
 
-	@for a in I.filter(ag->ag.status==infected, model.pop) begin
-		@stat("inf_contacts", MV, MM) <| Float64(length(a.contacts))
-		@stat("inf_periph", MV, MM) <| sqrt((a.x-0.5)^2 + (a.y-0.5)^2)
-	end
+#	@for a in I.filter(ag->ag.status==infected, model.pop) begin
+#		@stat("inf_contacts", MV, MM) <| Float64(length(a.contacts))
+#		@stat("inf_periph", MV, MM) <| sqrt((a.x-0.5)^2 + (a.y-0.5)^2)
+#	end
 
 	# counting could also have been done like this:
 	# @record "n_susceptible"	count(ag -> ag.status == susceptible, model.pop)

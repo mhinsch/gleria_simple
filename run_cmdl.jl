@@ -50,17 +50,6 @@ function run_events(sim, t_stop, logfile)
 end
 
 
-function run_steps(sim, t_stop, logfile, ord)
-	model = sim.model
-	for t in 1:t_stop
-		update_model!(model, ord)
-		# print all stats to file
-		data = observe(Data, model, t)
-		log_results(logfile, data)
-	end
-end
-
-
 
 ### setup, run, cleanup
 
@@ -84,14 +73,6 @@ const arg_settings = ArgParseSettings("run simulation", autofix_names=true)
 		help = "at which time to stop the simulation" 
 		arg_type = Float64 
 		default = 0.0
-	"--step-wise", "-s"
-		help = "run the model step-wise instead of event-based"
-		arg_type = Bool
-		default = false
-	"--shuffle"
-		help = "if running step-wise shuffle the population"
-		arg_type = Bool
-		default = false
 end
 
 # new group of arguments
@@ -118,12 +99,8 @@ const logf = prepare_outfiles("log_file.txt")
 
 ## run
 
-if args[:step_wise]
-	@time run_steps(sim, trunc(Int, args[:stop_time]), logf, args[:shuffle])
-else
-	init_events(sim)
-	@time run_events(sim, args[:stop_time], logf)
-end
+init_events(sim)
+@time run_events(sim, args[:stop_time], logf)
 
 
 

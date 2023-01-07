@@ -17,32 +17,28 @@
 
 
 function setup_grid(xs, ys)
-	pop = [ Person(x/xs, y/ys) for y=1:ys, x=1:xs ]
-
-	ret = Person[]
+	space = [ Sector(0) for y=1:ys, x=1:xs ]
 
 	for x in 1:xs, y in 1:ys
-		p = pop[y, x]
+		p = space[y, x]
 		if x > 1
-			push!(p.contacts, pop[y, x-1])
+			push!(p.neighbours, space[y, x-1])
 		end
 		if y > 1
-			push!(p.contacts, pop[y-1, x])
+			push!(p.neighbours, space[y-1, x])
 		end
 		if x < xs
-			push!(p.contacts, pop[y, x+1])
+			push!(p.neighbours, space[y, x+1])
 		end
 		if y < ys
-			push!(p.contacts, pop[y+1, x])
+			push!(p.neighbours, space[y+1, x])
 		end
-
-		push!(ret, p)
 	end
 
-	ret
+	space
 end
 
-
+# non-functional ATM
 function create_random_geo_graph(nnodes :: Int64, thresh :: Float64)
 	sq_thresh = thresh * thresh
 

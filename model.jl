@@ -24,117 +24,52 @@ using MiniEvents
 
 ### declare agent type(s)
 
-@enum Status susceptible infected immune dead
+@enum Status empty colonised
 
-mutable struct Person
+mutable struct Sector
     status :: Status
-    contacts :: Vector{Person}
-    x :: Float64
-    y :: Float64
+    neighbours :: Vector{Sector}
+	suitability :: Float64
 end
 
-Person(x, y) = Person(susceptible, [], x, y)
-Person(state, x, y) = Person(state, [], x, y)
+Sector(s) = Sector(empty, [], s)
+Sector(state, s) = Sector(state, [], s)
 
 
 
 ### declare simulation
 
 mutable struct Model
-    inf :: Float64
-    rec :: Float64
-    imm :: Float64
-    mort :: Float64
+    beta :: Float64
     
-    pop :: Vector{Person}
+    space :: Matrix{Sector}
 end
 
-Model(i, r, u, m) = Model(i, r, u, m, [])
+Model(b) = Model(b, Matrix{Sector}(undef, 0, 0))
 
 
 
 ### event-based: declare simulation processes
 
-@events person::Person begin
+@events sector::Sector begin
 	@debug
-    @rate(@sim().model.inf * count(p -> p.status == infected, person.contacts)) ~
-        person.status == susceptible        => 
+    @rate(@sim().model.beta * sector.suitability * count(s -> s.status == colonised, sector.neighbours)) ~
+        sector.status == empty => 
             begin
-                person.status = infected
-                @r person person.contacts
+                sector.status = colonised
+                @r sector sector.neighbours
             end
-
-    @rate(@sim().model.rec)  ~
-        person.status == infected           => 
-            begin
-                person.status = susceptible
-                @r person person.contacts
-            end
-
-    @rate(@sim().model.imm)  ~
-        person.status == infected           => 
-            begin
-                person.status = immune
-                @r person person.contacts
-            end
-    
-    @rate(@sim().model.mort)  ~
-        person.status == infected           => 
-            begin
-                person.status = dead
-                @r person person.contacts
-            end    
 end
 
 
-@simulation SIRm Person begin
+@simulation Gleria Sector begin
 	model :: Model
 end
 
 
 function init_events(sim)
-    for person in sim.model.pop
-        spawn!(person, sim)
+    for sector in sim.model.space
+        spawn!(sector, sim)
     end
 end
 
-
-### step-wise: define update functions
-
-function update_agent!(a, model)
-	if a.status == susceptible
-		for c in a.contacts
-			if c.status == infected && rand() < model.inf
-				a.status = infected
-				return
-			end
-		end
-	
-	elseif a.status == infected
-		p_nochange = (1.0 - model.rec) * (1.0 - model.imm) * (1.0 - model.mort)
-		p_change = 1.0 - p_nochange
-		f = p_change / (model.rec + model.imm + model.mort)
-		t_rec = p_nochange + model.rec * f
-		t_imm = t_rec + model.imm * f
-
-		r = rand()
-
-		if r < p_nochange # nothing happens
-		elseif r < t_rec
-			a.status = susceptible
-		elseif r < t_imm
-			a.status = immune
-		else
-			a.status = dead
-		end
-	end
-end
-
-
-function update_model!(model, rand_order = true)
-	order = rand_order ? shuffle(model.pop) : model.pop
-
-	for a in order
-		update_agent!(a, model)
-	end
-end

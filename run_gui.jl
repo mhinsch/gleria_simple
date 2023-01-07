@@ -52,10 +52,8 @@ function run(sim, gui, graphs, t_stop, logfile, max_step = 1.0)
 				data = observe(Data, model, i)
 				log_results(logfile, data)
 				# we can just reuse the observation results
-				add_value!(graphs[1], data.susceptible.n)
-				add_value!(graphs[2], data.infected.n)
-				add_value!(graphs[3], data.immune.n)
-				add_value!(graphs[4], data.dead.n)
+				add_value!(graphs[1], data.empty.n)
+				add_value!(graphs[2], data.colonised.n)
 			end
 			# remember when we did the last data output
 			last = now
@@ -159,7 +157,7 @@ const model = setup(p, args[:rand_seed])
 const logf = prepare_outfiles("log_file.txt")
 
 # two 640x640 panels next to each other
-const gui = setup_Gui("SIRSm", 640, 640, 2, 1)
+const gui = setup_Gui("SIRSm", 1500, 1500, 2, 1)
 const graphs = [Graph{Int}(green(255)), Graph{Int}(red(255)), Graph{Int}(blue(255)), Graph{Int}(WHITE)] 
 
 
