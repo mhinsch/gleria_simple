@@ -30,7 +30,7 @@ include("analysis.jl")
 function setup(par, seed)
 	Random.seed!(seed)
 
-	model = Model(par.r_beta)
+	model = Model(par.r_beta, par.r_extinct)
 
 	model.space = setup_grid(par.x, par.y)
 	for s in model.space
@@ -38,6 +38,7 @@ function setup(par, seed)
 	end
 
 	model.space[(size(model.space).÷2)...].status = colonised
+	model.space[(size(model.space).÷2)...].suitability = 1
 
 	for i in 1:(par.n_settled-1)
 		rand(model.space).status = colonised

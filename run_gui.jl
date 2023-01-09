@@ -54,6 +54,7 @@ function run(sim, gui, graphs, t_stop, logfile, max_step = 1.0)
 				# we can just reuse the observation results
 				add_value!(graphs[1], data.empty.n)
 				add_value!(graphs[2], data.colonised.n)
+				add_value!(graphs[3], data.col_neighbours.mean)
 			end
 			# remember when we did the last data output
 			last = now
@@ -158,7 +159,7 @@ const logf = prepare_outfiles("log_file.txt")
 
 # two 640x640 panels next to each other
 const gui = setup_Gui("SIRSm", 1500, 1500, 2, 1)
-const graphs = [Graph{Int}(green(255)), Graph{Int}(red(255)), Graph{Int}(blue(255)), Graph{Int}(WHITE)] 
+const graphs = [Graph{Int}(green(255)), Graph{Int}(red(255)), Graph{Float64}(blue(255)), Graph{Int}(WHITE)] 
 
 
 

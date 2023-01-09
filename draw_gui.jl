@@ -49,7 +49,8 @@ function draw_world(canvas, model)
 			col = green(255)
 		end
 		
-		circle_fill(canvas, x, y, 3, UInt32(col), true)
+		#circle_fill(canvas, x, y, 1, UInt32(col), true)
+		put(canvas, x, y, UInt32(col))
 	end
 end
 

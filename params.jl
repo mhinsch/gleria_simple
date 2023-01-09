@@ -29,6 +29,8 @@ using Parameters
 
 	"colonisation rate"
 	r_beta :: Float64 = 25
+	"extinction rate"
+	r_extinct :: Float64 = 0.01
 
 	"number of settled worlds to start with"
 	n_settled	:: Int = 1

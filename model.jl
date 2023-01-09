@@ -41,11 +41,12 @@ Sector(state, s) = Sector(state, [], s)
 
 mutable struct Model
     beta :: Float64
+	r_extinct :: Float64
     
     space :: Matrix{Sector}
 end
 
-Model(b) = Model(b, Matrix{Sector}(undef, 0, 0))
+Model(b, e) = Model(b, e, Matrix{Sector}(undef, 0, 0))
 
 
 
@@ -57,6 +58,12 @@ Model(b) = Model(b, Matrix{Sector}(undef, 0, 0))
         sector.status == empty => 
             begin
                 sector.status = colonised
+                @r sector sector.neighbours
+            end
+    @rate(@sim().model.r_extinct / sector.suitability) ~
+        sector.status == colonised =>
+            begin
+                sector.status = empty
                 @r sector sector.neighbours
             end
 end
