@@ -75,7 +75,7 @@ function main()
     screenHeight = floor(Int, 900 * scale)
 
     RL.InitWindow(screenWidth, screenHeight, "gleria 1.0")
-    RL.SetTargetFPS(30)
+    RL.SetTargetFPS(60)
     camera = RL.RayCamera2D(
         rayvector(screenWidth/2, screenHeight/2),
         rayvector(screenWidth/2, screenHeight/2),
