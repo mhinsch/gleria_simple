@@ -66,9 +66,9 @@ function run(sim, gui, graphs, t_stop, logfile, max_step = 1.0)
 		dt = time() - t1
 
 		# adjust simulation step size
-		if dt > 0.1
+		if dt > 0.05
 			step /= 1.1
-		elseif dt < 0.03 && step < max_step # this is a simple model, so let's limit
+		elseif dt < 0.01 && step < max_step # this is a simple model, so let's limit
 			step *= 1.1                # max step size to about 1
 		end
 
