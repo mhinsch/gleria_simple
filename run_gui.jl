@@ -39,7 +39,7 @@ function main()
 	
 	# this creates parameters with default values as defined in params.jl,
 	# then overrides that with values that are provided as cmdl args
-    pars, args = load_parameters(ARGS, Params, 
+    allpars, args = load_parameters(ARGS, Params, cmdl = (
 	    # additional cmdl args that are not part of params.jl
         ["--gui-scale"], 
 	    Dict(
@@ -60,22 +60,25 @@ function main()
 		Dict(
 			:help => "upper limit for simulated time per frame",
 			:arg_type => Float64,
-			:default => 1.0)
+			:default => 1.0) )
 		)
 		
+	pars = allpars[1]
 	# end of sim
-	t_stop = args[:stop_time]
+	t_stop :: Float64 = args[:stop_time]
 	# max step size
-	max_step = args[:max_step]
-		
+	max_step :: Float64 = args[:max_step]
+	
+	seed :: Int = args[:rand_seed]
+	
 	# *** set up GUI
 	
-    scale = args[:gui_scale]
+    scale :: Float64 = args[:gui_scale]
     screenWidth = floor(Int, 1600 * scale)
     screenHeight = floor(Int, 900 * scale)
 
     RL.InitWindow(screenWidth, screenHeight, "gleria 1.0")
-    RL.SetTargetFPS(60)
+    RL.SetTargetFPS(30)
     camera = RL.RayCamera2D(
         rayvector(screenWidth/2, screenHeight/2),
         rayvector(screenWidth/2, screenHeight/2),
@@ -85,7 +88,7 @@ function main()
         
     # *** set up model 
         
-	sim = setup(pars, args[:rand_seed])
+	sim = setup(pars, seed)
 	model = sim.model
 	
 	# *** output, graphs
@@ -131,8 +134,6 @@ function main()
 				last_observe = now
 			end
 
-			t += step
-
 			# measure (real-world) time it took to simulate one step
 			dt = time() - t1
 
@@ -142,6 +143,8 @@ function main()
 			elseif dt < 0.01 && step < max_step 
 				step *= 1.1                
 			end
+			
+			t += step
 
 			println(t)
 		end
