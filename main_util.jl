@@ -14,13 +14,13 @@ add_to_load_path!(joinpath(@__DIR__, "lib"))
 
 using ParamUtils
 
-function load_parameters(argv, partype, cmdl...; override = nothing)
+#=function load_parameters(argv, partype, cmdl...; override = nothing)
 	pars, args = load_parameters(argv, (partype,), cmdl...; override)
 	
 	pars[1], args
-end
+end=#
 	
-function load_parameters(argv, partypes::T, cmdl...; override = nothing) where {T<:Tuple}
+function load_parameters(argv, partypes...; override=nothing, cmdl=nothing)
 	arg_settings = ArgParseSettings("run simulation", autofix_names=true)
 
 	@add_arg_table! arg_settings begin
@@ -35,7 +35,7 @@ function load_parameters(argv, partypes::T, cmdl...; override = nothing) where {
 			default = "parameters.run.yaml"
 	end
 
-    if ! isempty(cmdl)
+    if cmdl != nothing
         add_arg_table!(arg_settings, cmdl...)
     end
 
@@ -61,7 +61,7 @@ function load_parameters(argv, partypes::T, cmdl...; override = nothing) where {
     override_pars_cmdl!(args, par_objects...)
 
     # keep a record of parameters used 
-    save_parameters_to_file(args[:par_out_file], par_objects...)
+    #save_parameters_to_file(args[:par_out_file], par_objects...)
 
     par_objects, args
 end

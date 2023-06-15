@@ -26,27 +26,24 @@ include("params.jl")
 include("setup.jl")
 
 
-function main()
-	
+function prepare()	
 	# *** parameters and command line
 	
 	# this creates parameters with default values as defined in params.jl,
 	# then overrides that with values that are provided as cmdl args
-    pars, args = load_parameters(ARGS, Params, cmdl = (
+    pars, args = load_parameters(ARGS, Params, cmdl = ( 
 		["--rand-seed", "-r"],
 		Dict(:help => "random seed",
 			:arg_type => Int,
-			:default => 42),
+			:default => 42), 
 		["--stop-time", "-t"],
 		Dict(:help => "at which time to stop the simulation",
 			:arg_type => Float64, 
 			:default => 0.0) )
 		)
 		
-	# end of sim
-	t_stop :: Float64 = args[:stop_time]
+	t_s :: Float64 = args[:stop_time]
 	seed :: Int = args[:rand_seed]
-		
     # *** set up model 
         
 	sim = setup(pars[1], seed)
@@ -58,13 +55,15 @@ function main()
 		
 	# *** main loop
 	
-	init_events(sim)
-	
+	sim, pars[1], logfile, t_s 
+end
+
+function run_steps(sim, pars, logfile, n)
 	t = 1.0
 	step = 1.0
 	last_observe = 0
 
-	while t_stop <= 0 || t < t_stop
+	while t < n
 		step_until!(sim, t) # run internal scheduler up to the next time step
 		
 		# we want the analysis to happen at every integral time step
@@ -72,7 +71,7 @@ function main()
 			# in case we skipped a step (shouldn't happen, but just in case...)
 			for i in last_observe:now
 				# print all stats to file
-				data = observe(Data, model, i)
+				data = observe(Data, sim.model, i)
 				log_results(logfile, data)
 			end
 			# remember when we did the last data output
@@ -83,15 +82,20 @@ function main()
 
 #		println(t)
 	end
-	
+end
+
+function finish(logfile)
 	close(logfile)
 end
 
+#const s, p, l = prepare()
 
-
-if ! isinteractive()
-	@time main()
+function run()
+	@time s, p, l, t = prepare()
+	#pp = Params()
+	@time init_events(s)
+	@time run_steps(s, p, l, t)
+	@time finish(l)
 end
 
-
-
+run()
