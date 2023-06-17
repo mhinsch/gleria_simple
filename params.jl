@@ -13,18 +13,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
-
-# This package provides some nice convenience syntax for parameters.
-# Specifically we can set default values for struct elements. A constructor is
-# then created that a) has all struct elements as named args and b) sets the
-# value of elements to the default values if they are not specified on calling
-# the constructor
-using Parameters
-
-
 "Simulation parameters"
-@with_kw struct Params
+@kwdef struct Params
 	# element documentation is automatically translated into commandline help text
 
 	"colonisation rate"

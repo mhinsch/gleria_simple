@@ -15,7 +15,7 @@
 
 
 
-module SimpleGraph
+module SimpleGraph_SDL
 
 export Graph, add_value!, draw_graph
 

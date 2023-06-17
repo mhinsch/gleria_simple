@@ -15,53 +15,20 @@
 
 
 
-using SSDL
-using SimpleGraph
-using SimpleGui
-
 
 ### draw GUI
 
 # draw world to canvas
-function draw_world(canvas, model)
-	xs = canvas.xsize - 1
-	ys = canvas.ysize - 1
-
-	# draw connections
-#=	for p in model.pop
-		x1 = trunc(Int, p.x * xs) + 1
-		y1 = trunc(Int, p.y * ys) + 1
-
-		for p2 in p.contacts
-			x2 = trunc(Int, p2.x * xs) + 1
-			y2 = trunc(Int, p2.y * ys) + 1
-
-			line(canvas, x1, y1, x2, y2, red(255))
-		end
-	end
-=#
+function draw_world(model, xs=0, ys=0)
 	# draw sectors
 	for x in 1:size(model.space)[1], y in 1:size(model.space)[2]
 		s = model.space[x, y]
 		if s.status == empty
-			col = red(floor(Int, 255 * s.suitability))
+			col = RL.ColorFromNormalized(RL.rayvector(s.suitability, 0.0, 0.0, 1.0))
 		elseif s.status == colonised
-			col = green(255)
+			col = RL.GREEN
 		end
-		
-		#circle_fill(canvas, x, y, 1, UInt32(col), true)
-		put(canvas, x, y, UInt32(col))
+		RL.DrawPixel(x+xs, y+ys, col)
 	end
-end
-
-# draw both panels to video memory
-function draw(model, graphs, gui)
-	clear!(gui.canvas)
-	draw_world(gui.canvas, model)
-	update!(gui.panels[1,1], gui.canvas)
-
-	clear!(gui.canvas)
-	draw_graph(gui.canvas, graphs)
-	update!(gui.panels[2, 1], gui.canvas)
 end
 
