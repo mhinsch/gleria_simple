@@ -15,7 +15,7 @@
 
 
 
-module SimpleGraph
+module SimpleGraph_RL
 
 using Printf
 

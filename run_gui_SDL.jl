@@ -13,25 +13,19 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Raylib
-using Raylib: rayvector
 
-# make this less annoying
-const RL = Raylib
+using SimpleDirectMediaLayer.LibSDL2
 
 include("main_util.jl")
 
 add_to_load_path!("./lib/")
 
-
-using SimpleGraph
+using SimpleGui
 using ParamUtils
 
 include("params.jl")
 include("setup.jl")
-include("draw_gui.jl")
-
-
+include("draw_gui_SDL.jl")
 
 function main()
 	
@@ -71,57 +65,33 @@ function main()
 	
 	seed :: Int = args[:rand_seed]
 	
-	# *** set up GUI
+	# *** setup gui
 	
-    scale :: Float64 = args[:gui_scale]
-    screenWidth = floor(Int, 1600 * scale)
-    screenHeight = floor(Int, 900 * scale)
-
-    RL.InitWindow(screenWidth, screenHeight, "gleria 1.0")
-    RL.SetTargetFPS(30)
-    camera = RL.RayCamera2D(
-        rayvector(screenWidth/2, screenHeight/2),
-        rayvector(screenWidth/2, screenHeight/2),
-        #rayvector(500, 500),
-        0,
-        1)
-        
+	gui = setup_Gui("gleria 1.0", 1500, 1500, 2, 1)
+	graphs = [Graph{Int}(green(255)), Graph{Int}(red(255)), Graph{Float64}(blue(255)), Graph{Int}(WHITE)] 
     # *** set up model 
         
+	logfile = prepare_outfiles("log_file.txt")
 	sim = setup(pars, seed)
 	model = sim.model
-	
-	# *** output, graphs
-	
-	logfile = prepare_outfiles("log_file.txt")	
-	graphs = [
-		Graph{Int}(RL.GREEN), 
-		Graph{Int}(RL.RED), 
-		Graph{Float64}(RL.BLUE)] 
-		#Graph{Int}(RL.WHITE)] 
-		
-		
-	# *** main loop
-	
 	init_events(sim)
 	
 	t = 1.0
 	step = max_step
-	last_observe = 0
-	
+	last = 0
+
 	pause = false
-	while ! RL.WindowShouldClose()
-		
-		# *** simulation logic and analysis/output
-			
+	quit = false
+	while ! quit
+		# don't do anything if we are in pause mode
 		if !pause && !(t_stop > 0 && t >= t_stop)
 			t1 = time()
 			step_until!(sim, t) # run internal scheduler up to the next time step
 			
 			# we want the analysis to happen at every integral time step
-			if (now = trunc(Int, t)) >= last_observe
+			if (now = trunc(Int, t)) >= last
 				# in case we skipped a step (shouldn't happen, but just in case...)
-				for i in last_observe:now
+				for i in last:now
 					# print all stats to file
 					data = observe(Data, model, i)
 					log_results(logfile, data)
@@ -131,7 +101,7 @@ function main()
 					add_value!(graphs[3], data.col_neighbours.mean)
 				end
 				# remember when we did the last data output
-				last_observe = now
+				last = now
 			end
 
 			# measure (real-world) time it took to simulate one step
@@ -140,46 +110,46 @@ function main()
 			# adjust simulation step size
 			if dt > 0.05
 				step /= 1.1
-			elseif dt < 0.01 && step < max_step 
-				step *= 1.1                
+			elseif dt < 0.01 && step < max_step # this is a simple model, so let's limit
+				step *= 1.1                # max step size to about 1
 			end
 			
 			t += step
 
 			println(t)
 		end
-
-        if RL.IsKeyPressed(Raylib.KEY_SPACE)
-            pause = !pause
-            sleep(0.2)
-        end
-        
-        # *** GUI stuff
-        
-        RL.BeginDrawing()
-
-        RL.ClearBackground(RL.LIGHTGRAY)
-        
-        RL.BeginMode2D(camera)
-        
-        draw_world(model, 0, 0) 
-
-        RL.EndMode2D()
-
-        # draw graphs
-        draw_graph(floor(Int, 2*screenWidth*1/3), 0, 
-                   floor(Int, screenWidth*1/3), floor(Int, screenHeight/2)-20, 
-                   graphs,
-                   single_scale = true, 
-                   labels = ["empty", "colonized", "n neighb"],
-                   fontsize = floor(Int, 15 * scale))
 		
-		RL.EndDrawing()
+		event_ref = Ref{SDL_Event}()
+        while Bool(SDL_PollEvent(event_ref))
+            evt = event_ref[]
+            evt_ty = evt.type
+			if evt_ty == SDL_QUIT
+                quit = true
+                break
+            elseif evt_ty == SDL_KEYDOWN
+                scan_code = evt.key.keysym.scancode
+                if scan_code == SDL_SCANCODE_ESCAPE || scan_code == SDL_SCANCODE_Q
+					quit = true
+					break
+                elseif scan_code == SDL_SCANCODE_P || scan_code == SDL_SCANCODE_SPACE
+					pause = !pause
+                    break
+                else
+                    break
+                end
+            end
+		end
+
+		# draw gui to video memory
+		draw(model, graphs, gui)
+		# copy to screen
+		render!(gui)
 	end
 	
-	RL.CloseWindow()	
-	
+	# *** cleanup
+
 	close(logfile)
+	SDL2.Quit()
 end
 
 
