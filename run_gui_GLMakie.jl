@@ -83,7 +83,9 @@ function main()
 	fig = Figure()
 	heatmap(fig[1, 1], world_disp, colormap = [:green, :red], overdraw=true)
 	graphs1 = Observable([[0.0],[0.0]]) 
-	axis, plots = series(fig[1, 2][1, 1], graphs1)
+	axis1, _ = series(fig[1, 2][1, 1], graphs1)
+	graphs2 = Observable([[0.0]]) 
+	axis2, _ = series(fig[1, 2][2, 1], graphs2)
 	
 	display(fig)
 	
@@ -109,7 +111,7 @@ function main()
 					# we can just reuse the observation results
 					push!(graphs1[][1], data.empty.n)
 					push!(graphs1[][2], data.colonised.n)
-					#add_value!(graphs[3], data.col_neighbours.mean)
+					push!(graphs2[][1], data.col_neighbours.mean)
 				end
 				# remember when we did the last data output
 				last = now
@@ -136,8 +138,10 @@ function main()
 		
 		disp!(world_disp[], model)
 		notify(world_disp)
-		autolimits!(axis)
+		autolimits!(axis1)
+		autolimits!(axis2)
 		notify(graphs1)
+		notify(graphs2)
 	end
 	
 	# *** cleanup
