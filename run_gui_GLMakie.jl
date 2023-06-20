@@ -54,7 +54,11 @@ function main()
 		Dict(
 			:help => "upper limit for simulated time per frame",
 			:arg_type => Float64,
-			:default => 1.0) )
+			:default => 1.0),
+		["--quit-on-stop", "-q"],
+		Dict(
+			:help => "whether to quit when stop-time is reached",
+			:action => :store_true) )
 		)
 		
 	pars = allpars[1]
@@ -122,16 +126,19 @@ function main()
 				step *= 1.1                # max step size to about 1
 			end
 			
-			series!(fig[1, 2][1, 1], graphs1)
-			disp!(world_disp[], model)
-			notify(world_disp)
-			#notify(graphs1)
-			
 			t += step
 
 			println(t)
 		end
 		
+		if t_stop > 0 && t >= t_stop && args[:quit_on_stop] 
+			break
+		end
+		
+		series!(fig[1, 2][1, 1], graphs1)
+		disp!(world_disp[], model)
+		notify(world_disp)
+		#notify(graphs1)
 #=		event_ref = Ref{SDL_Event}()
         while Bool(SDL_PollEvent(event_ref))
             evt = event_ref[]
@@ -166,6 +173,6 @@ end
 
 
 if ! isinteractive()
-    main()
+    @time main()
 end
 
