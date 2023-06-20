@@ -82,9 +82,8 @@ function main()
 	disp!(world_disp[], model)
 	fig = Figure()
 	heatmap(fig[1, 1], world_disp, colormap = [:green, :red], overdraw=true)
-	graphs1o = Observable([[0.0],[0.0]]) 
-	graphs1 = [[0.0],[0.0]] 
-	axis, plots = series(fig[1, 2][1, 1], graphs1o)
+	graphs1 = Observable([[0.0],[0.0]]) 
+	axis, plots = series(fig[1, 2][1, 1], graphs1)
 	
 	display(fig)
 	
@@ -108,8 +107,8 @@ function main()
 					data = observe(Data, model, i)
 					log_results(logfile, data)
 					# we can just reuse the observation results
-					push!(graphs1[1], data.empty.n)
-					push!(graphs1[2], data.colonised.n)
+					push!(graphs1[][1], data.empty.n)
+					push!(graphs1[][2], data.colonised.n)
 					#add_value!(graphs[3], data.col_neighbours.mean)
 				end
 				# remember when we did the last data output
@@ -135,38 +134,11 @@ function main()
 			break
 		end
 		
-		#series!(fig[1, 2][1, 1], graphs1)
 		disp!(world_disp[], model)
 		notify(world_disp)
-		graphs1o[] = graphs1
 		autolimits!(axis)
-		#notify(graphs1)
-#=		event_ref = Ref{SDL_Event}()
-        while Bool(SDL_PollEvent(event_ref))
-            evt = event_ref[]
-            evt_ty = evt.type
-			if evt_ty == SDL_QUIT
-                quit = true
-                break
-            elseif evt_ty == SDL_KEYDOWN
-                scan_code = evt.key.keysym.scancode
-                if scan_code == SDL_SCANCODE_ESCAPE || scan_code == SDL_SCANCODE_Q
-					quit = true
-					break
-                elseif scan_code == SDL_SCANCODE_P || scan_code == SDL_SCANCODE_SPACE
-					pause = !pause
-                    break
-                else
-                    break
-                end
-            end
-		end
-
-		# draw gui to video memory
-		draw(model, graphs, gui)
-		# copy to screen
-		render!(gui)
-=#	end
+		notify(graphs1)
+	end
 	
 	# *** cleanup
 
