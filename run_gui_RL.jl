@@ -56,7 +56,11 @@ function main()
 			:help => "at which time to stop the simulation",
 			:arg_type => Float64, 
 			:default => 0.0),
-		["--max-step", "-m"],
+		["--quit-on-stop", "-q"],
+		Dict(
+			:help => "whether to quit when stop-time is reached",
+			:action => :store_true), 
+			["--max-step", "-m"],
 		Dict(
 			:help => "upper limit for simulated time per frame",
 			:arg_type => Float64,
@@ -148,6 +152,10 @@ function main()
 
 			println(t)
 		end
+		
+		if t_stop > 0 && t >= t_stop && args[:quit_on_stop] 
+			break
+		end
 
         if RL.IsKeyPressed(Raylib.KEY_SPACE)
             pause = !pause
@@ -184,6 +192,6 @@ end
 
 
 if ! isinteractive()
-    main()
+    @time main()
 end
 
