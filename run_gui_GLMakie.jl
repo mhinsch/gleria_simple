@@ -82,9 +82,9 @@ function main()
 	disp!(world_disp[], model)
 	fig = Figure()
 	heatmap(fig[1, 1], world_disp, colormap = [:green, :red], overdraw=true)
-	graphs1 = [Vector{Int}(), Vector{Int}()] 
-	push!.(graphs1, 0)
-	series(fig[1, 2][1, 1], graphs1)
+	graphs1o = Observable([[0.0],[0.0]]) 
+	graphs1 = [[0.0],[0.0]] 
+	axis, plots = series(fig[1, 2][1, 1], graphs1o)
 	
 	display(fig)
 	
@@ -135,9 +135,11 @@ function main()
 			break
 		end
 		
-		series!(fig[1, 2][1, 1], graphs1)
+		#series!(fig[1, 2][1, 1], graphs1)
 		disp!(world_disp[], model)
 		notify(world_disp)
+		graphs1o[] = graphs1
+		autolimits!(axis)
 		#notify(graphs1)
 #=		event_ref = Ref{SDL_Event}()
         while Bool(SDL_PollEvent(event_ref))
