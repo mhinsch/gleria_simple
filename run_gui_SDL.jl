@@ -50,6 +50,10 @@ function main()
 			:help => "at which time to stop the simulation",
 			:arg_type => Float64, 
 			:default => 0.0),
+		["--quit-on-stop", "-q"],
+		Dict(
+			:help => "whether to quit when stop-time is reached",
+			:action => :store_true),
 		["--max-step", "-m"],
 		Dict(
 			:help => "upper limit for simulated time per frame",
@@ -119,6 +123,10 @@ function main()
 			println(t)
 		end
 		
+		if t_stop > 0 && t >= t_stop && args[:quit_on_stop] 
+			break
+		end
+		
 		event_ref = Ref{SDL_Event}()
         while Bool(SDL_PollEvent(event_ref))
             evt = event_ref[]
@@ -149,11 +157,11 @@ function main()
 	# *** cleanup
 
 	close(logfile)
-	SDL2.Quit()
+	SDL_Quit()
 end
 
 
 if ! isinteractive()
-    main()
+    @time main()
 end
 
