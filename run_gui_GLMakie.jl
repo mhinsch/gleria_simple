@@ -78,26 +78,34 @@ function main()
 	
 	# *** setup gui
 	
+	GLMakie.activate!()
 	world_disp = Observable(zeros(size(model.space)))
 	disp!(world_disp[], model)
-	fig = Figure()
+	
+	fig = Figure(resolution=(1200,800))
+	
 	heatmap(fig[1, 1], world_disp, colormap = [:green, :red], overdraw=true)
+	
 	graphs1 = Observable([[0.0],[0.0]]) 
 	axis1, _ = series(fig[1, 2][1, 1], graphs1)
 	graphs2 = Observable([[0.0]]) 
 	axis2, _ = series(fig[1, 2][2, 1], graphs2)
 	
-	display(fig)
+	runbutton = Button(fig[2,1]; label = "run", tellwidth = false)
+	pause = Observable(false)
+	on(runbutton.clicks) do clicks; pause[] = !pause[]; end
+	
+	w = display(fig)
+	resize!(w, 1200, 800)
 	
 	t = 1.0
 	step = max_step
 	last = 0
 
-	pause = false
 	quit = false
 	while ! quit
 		# don't do anything if we are in pause mode
-		if !pause && !(t_stop > 0 && t >= t_stop)
+		if !pause[] && !(t_stop > 0 && t >= t_stop)
 			t1 = time()
 			step_until!(sim, t) # run internal scheduler up to the next time step
 			
@@ -134,6 +142,10 @@ function main()
 		
 		if t_stop > 0 && t >= t_stop && args[:quit_on_stop] 
 			break
+		end
+		
+		if pause[]
+			sleep(0.001)
 		end
 		
 		disp!(world_disp[], model)
